@@ -1,188 +1,135 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { stories } from './stories.js';
+import quietGirlImage from './assets/quiet-girl.png';
+import storyPathImage from './assets/story-path.png';
 
-function ImageArea({ label, mood }) {
+function StoryArtwork({ story, variant = 'quiet' }) {
+  const image = variant === 'path' ? storyPathImage : quietGirlImage;
+
   return (
-    <div className={`image-area ${mood}`}>
-      <div className="sun"></div>
-      <div className="window">
-        <span></span>
-        <span></span>
-      </div>
-      <div className="rug"></div>
-      <p>{label}</p>
+    <div className={`story-artwork ${variant}`}>
+      <img src={image} alt={story.imagePrompt} />
     </div>
   );
 }
 
-function HomeScreen({ onStart }) {
+function HomeScreen({ onSelectStory }) {
   return (
-    <section className="slide home-slide" aria-labelledby="home-title">
-      <div className="classroom-top">
-        <span className="pencil"></span>
-        <span className="star"></span>
-        <span className="book"></span>
+    <section className="screen menu-screen" aria-labelledby="home-title">
+      <div className="menu-art">
+        <StoryArtwork story={stories[0]} />
       </div>
 
-      <div>
-        <p className="eyebrow">Feelings story deck</p>
-        <h1 id="home-title">
-          <span>Thinking</span>
-          <span>Stories</span>
-        </h1>
-        <p className="subtitle">
-          Short stories that help kids understand feelings, choices, and other
-          people's perspectives.
-        </p>
-      </div>
-
-      <button className="primary-button" type="button" onClick={onStart}>
-        Start a Story
-      </button>
-    </section>
-  );
-}
-
-function StoryScreen({ stories, selectedStory, onSelectStory, onChoose }) {
-  return (
-    <section className="slide story-slide" aria-labelledby="story-title">
-      <div className="slide-header">
-        <p className="eyebrow">Story choices</p>
-        <h2 id="story-title">Choose a story</h2>
-        <p className="instruction-text">
-          Pick a situation and explore three different ways to think and feel
-          about it.
-        </p>
-      </div>
-
-      <div className="story-picker" aria-label="Choose a story">
-        {stories.map((story) => (
-          <button
-            className={`story-card ${
-              story.id === selectedStory.id ? 'selected' : ''
-            }`}
-            type="button"
-            key={story.id}
-            onClick={() => onSelectStory(story)}
-          >
-            <span>{story.title}</span>
-            <p>{story.shortLabel}</p>
-          </button>
-        ))}
-      </div>
-
-      <ImageArea label={selectedStory.imageLabel} mood="story-mood" />
-
-      <article className="scenario-card">
-        <p>{selectedStory.scenario}</p>
-      </article>
-
-      <div className="choices" aria-label="Story choices">
-        {selectedStory.choices.map((choice) => (
-          <button
-            className="choice-button"
-            type="button"
-            key={choice.letter}
-            onClick={() => onChoose(choice)}
-          >
-            <span>{choice.letter}</span>
-            <p>{choice.text}</p>
-          </button>
-        ))}
+      <div className="menu-content">
+        <p className="eyebrow">Feelings storybook</p>
+        <h1 id="home-title">Thinking Stories</h1>
+        <div className="story-grid" aria-label="Choose a story">
+          {stories.map((story, index) => (
+            <button
+              className="story-title-button"
+              type="button"
+              key={story.id}
+              onClick={() => onSelectStory(story)}
+            >
+              <span className="story-number">{index + 1}</span>
+              <span>{story.title}</span>
+            </button>
+          ))}
+        </div>
       </div>
     </section>
   );
 }
 
-function ReflectionScreen({ choice, onBack, onHome }) {
+function StoryIntroScreen({ story, onExplore, onMenu }) {
   return (
-    <section className="slide reflection-slide" aria-labelledby="reflection-title">
-      <div className="slide-header">
-        <p className="eyebrow">Reflection</p>
-        <h2 id="reflection-title">What could this mean?</h2>
+    <section className="screen intro-screen" aria-labelledby="story-title">
+      <header className="top-bar">
+        <button className="quiet-button" type="button" onClick={onMenu}>
+          Menu
+        </button>
+      </header>
+
+      <div className="intro-layout">
+        <StoryArtwork story={story} variant="path" />
+
+        <article className="story-intro">
+          <p className="eyebrow">{story.category}</p>
+          <h2 id="story-title">{story.title}</h2>
+          <p className="scenario-text">{story.scenario}</p>
+          <button className="primary-button" type="button" onClick={onExplore}>
+            Explore
+          </button>
+        </article>
+      </div>
+    </section>
+  );
+}
+
+function ReflectionScreen({ story, onBack, onMenu }) {
+  const choices = useMemo(() => Object.entries(story.choices), [story]);
+
+  return (
+    <section className="screen reflection-screen" aria-labelledby="reflection-title">
+      <header className="top-bar">
+        <button className="quiet-button" type="button" onClick={onBack}>
+          Back
+        </button>
+        <button className="quiet-button" type="button" onClick={onMenu}>
+          Menu
+        </button>
+      </header>
+
+      <div className="reflection-heading">
+        <StoryArtwork story={story} variant="quiet-small" />
+        <div>
+          <p className="eyebrow">Reflections</p>
+          <h2 id="reflection-title">{story.title}</h2>
+        </div>
       </div>
 
-      <ImageArea label="Think together" mood="reflection-mood" />
-
-      <article className="reflection-card">
-        <span className="letter-badge">{choice.letter}</span>
-        <p className="choice-text">{choice.text}</p>
-        <p>{choice.reflection}</p>
-      </article>
-
-      <div className="reflection-actions">
-        <button className="back-button" type="button" onClick={onBack}>
-          Back to story
-        </button>
-        <button className="home-button" type="button" onClick={onHome}>
-          Choose another story
-        </button>
+      <div className="reflection-grid" aria-label="A, B, and C reflections">
+        {choices.map(([letter, text]) => (
+          <article className="reflection-card" key={letter}>
+            <span className="letter-badge">{letter}</span>
+            <p>{text}</p>
+          </article>
+        ))}
       </div>
     </section>
   );
 }
 
 export default function App() {
-  const [isReady, setIsReady] = useState(false);
-  const [screen, setScreen] = useState('home');
+  const [screen, setScreen] = useState('menu');
   const [selectedStory, setSelectedStory] = useState(stories[0]);
-  const [selectedChoice, setSelectedChoice] = useState(null);
-
-  useEffect(() => {
-    const frameId = requestAnimationFrame(() => setIsReady(true));
-    return () => cancelAnimationFrame(frameId);
-  }, []);
-
-  // Stories live in src/stories.js so adding more decks later stays simple.
-  function startStory() {
-    setSelectedChoice(null);
-    setScreen('story');
-  }
 
   function selectStory(story) {
     setSelectedStory(story);
-    setSelectedChoice(null);
+    setScreen('intro');
   }
 
-  function chooseReflection(choice) {
-    setSelectedChoice(choice);
-    setScreen('reflection');
-  }
-
-  function goBackToStory() {
-    setScreen('story');
-  }
-
-  function chooseAnotherStory() {
-    setSelectedChoice(null);
-    setScreen('story');
+  function showMenu() {
+    setScreen('menu');
   }
 
   return (
     <main className="app-shell">
-      {!isReady && (
-        <section className="slide loading-slide" aria-live="polite">
-          <p className="eyebrow">Thinking Stories</p>
-          <h1>Loading...</h1>
-        </section>
-      )}
+      {screen === 'menu' && <HomeScreen onSelectStory={selectStory} />}
 
-      {isReady && screen === 'home' && <HomeScreen onStart={startStory} />}
-
-      {isReady && screen === 'story' && (
-        <StoryScreen
-          stories={stories}
-          selectedStory={selectedStory}
-          onSelectStory={selectStory}
-          onChoose={chooseReflection}
+      {screen === 'intro' && (
+        <StoryIntroScreen
+          story={selectedStory}
+          onExplore={() => setScreen('reflection')}
+          onMenu={showMenu}
         />
       )}
 
-      {isReady && screen === 'reflection' && selectedChoice && (
+      {screen === 'reflection' && (
         <ReflectionScreen
-          choice={selectedChoice}
-          onBack={goBackToStory}
-          onHome={chooseAnotherStory}
+          story={selectedStory}
+          onBack={() => setScreen('intro')}
+          onMenu={showMenu}
         />
       )}
     </main>
