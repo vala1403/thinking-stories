@@ -250,6 +250,7 @@ h2 {
 
 .story-intro {
   min-width: 0;
+  width: 100%;
   display: grid;
   justify-items: center;
   text-align: center;
@@ -259,13 +260,24 @@ h2 {
   display: none;
 }
 
+.story-intro h2 {
+  width: min(100%, 44rem);
+  max-width: 100%;
+  font-size: clamp(3.1rem, 6vw, 5.6rem);
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
 .scenario-text {
-  max-width: 43rem;
+  width: min(100%, 43rem);
+  max-width: 100%;
   margin: 0 0 clamp(52px, 8vw, 82px);
   color: var(--ink);
-  font-size: clamp(1.25rem, 2.2vw, 1.62rem);
+  font-size: clamp(1.16rem, 2vw, 1.5rem);
   font-weight: 800;
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .primary-button {
@@ -420,6 +432,7 @@ h2 {
   }
 
   .scenario-text {
+    width: min(100%, 38rem);
     margin-bottom: 36px;
   }
 
@@ -474,8 +487,10 @@ h2 {
     font-size: 2rem;
   }
 
-  h2 {
-    font-size: clamp(3.2rem, 17vw, 4.7rem);
+  .story-intro h2 {
+    width: min(100%, 22rem);
+    font-size: clamp(2.35rem, 12vw, 4.1rem);
+    line-height: 1.08;
   }
 
   .story-grid {
@@ -506,7 +521,8 @@ h2 {
   }
 
   .scenario-text {
-    font-size: 1.15rem;
+    width: min(100%, 22rem);
+    font-size: clamp(1.02rem, 4.6vw, 1.15rem);
     line-height: 1.45;
   }
 
